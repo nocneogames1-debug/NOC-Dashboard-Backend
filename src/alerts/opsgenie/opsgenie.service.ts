@@ -28,7 +28,7 @@ export class OpsgenieService {
 
         try {
             const response = await firstValueFrom(
-                this.http.get('https://api.opsgenie.com/v2/alerts', {
+                this.http.get(process.env.OPSGENIE_API_URL as string, {
                     headers: {
                         Authorization: `GenieKey ${process.env.OPSGENIE_API_KEY}`,
                         'Content-Type': 'application/json',
