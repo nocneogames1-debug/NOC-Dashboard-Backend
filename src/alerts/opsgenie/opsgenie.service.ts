@@ -102,4 +102,43 @@ export class OpsgenieService {
             this.logger.error(`Failed to create tag for alert ID: ${alertId}`, error.stack);
         }
     }
+
+    async getAlertById(alertId: string) {
+        this.logger.log(`Fetching alert details for ID: ${alertId}`);
+
+        try {
+            // Construct the URL: OPSGENIE_API_URL usually ends in /v2/alerts
+            const url = `${process.env.OPSGENIE_API_URL}/${alertId}`;
+
+            const response = await firstValueFrom(
+                this.http.get(url, {
+                    headers: {
+                        Authorization: `GenieKey ${process.env.OPSGENIE_API_KEY}`,
+                        'Content-Type': 'application/json',
+                    },
+                    httpsAgent: this.httpsAgent,
+                    params: {
+                        identifierType: 'id', // Explicitly state we are using the ID
+                    },
+                }),
+            );
+
+            const alertData = response.data?.data;
+            this.logger.log(`Successfully retrieved details for alert ID: ${alertId}`);
+            return alertData;
+
+        } catch (error: any) {
+            if (error.response) {
+                this.logger.error(
+                    `Failed to fetch alert ${alertId}: ${error.response.status} ${error.response.statusText}`,
+                );
+                this.logger.error(
+                    `Opsgenie response data: ${JSON.stringify(error.response.data)}`,
+                );
+            } else {
+                this.logger.error(`Failed to fetch alert ${alertId}`, error.stack);
+            }
+            return null;
+        }
+    }
 }
